@@ -2,57 +2,99 @@ import os
 import shutil
 import platform
 import random
-import json
 
-BALANCE_FILE = 'balance.txt'
-HISTORY_FILE = 'purchases.json'
-LISTDIR_FILE = 'listdir.txt'
+# Функция для создания папки
+def create_folder():
+    folder_name = input("Введите имя папки для создания: ")
+    os.makedirs(folder_name, exist_ok=True)
+    print(f"Папка '{folder_name}' создана.")
 
-# Функция для чтения баланса с файла
-def read_balance():
-    if os.path.exists(BALANCE_FILE):
-        with open(BALANCE_FILE, 'r') as f:
-            return float(f.read())
-    return 0.0
+# Функция для удаления файла или папки
+def delete_file_folder():
+    name = input("Введите имя файла/папки для удаления: ")
+    if os.path.isdir(name):
+        shutil.rmtree(name)
+        print(f"Папка '{name}' удалена.")
+    elif os.path.isfile(name):
+        os.remove(name)
+        print(f"Файл '{name}' удален.")
+    else:
+        print(f"Файл или папка '{name}' не найдены.")
 
-# Функция для сохранения баланса в файл
-def save_balance(balance):
-    with open(BALANCE_FILE, 'w') as f:
-        f.write(str(balance))
+# Функция для копирования файла или папки
+def copy_file_folder():
+    src = input("Введите имя копируемого файла/папки: ")
+    dst = input("Введите новое имя файла/папки: ")
+    if os.path.isdir(src):
+        shutil.copytree(src, dst)
+        print(f"Папка '{src}' скопирована как '{dst}'.")
+    elif os.path.isfile(src):
+        shutil.copy(src, dst)
+        print(f"Файл '{src}' скопирован как '{dst}'.")
+    else:
+        print(f"Файл или папка '{src}' не найдены.")
 
-# Функция для чтения истории покупок с файла
-def read_history():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, 'r') as f:
-            return json.load(f)
-    return []
+# Функция для отображения содержимого директории
+def list_directory():
+    print("Содержимое рабочей директории:")
+    for item in os.listdir():
+        print(item)
 
-# Функция для сохранения истории покупок в файл
-def save_history(purchases):
-    with open(HISTORY_FILE, 'w') as f:
-        json.dump(purchases, f)
+# Функция для отображения только папок
+def list_folders():
+    print("Папки в рабочей директории:")
+    for item in os.listdir():
+        if os.path.isdir(item):
+            print(item)
 
-# Функция для сохранения содержимого рабочей директории в файл
-def save_directory_contents():
-    files = []
-    directories = []
-
+# Функция для отображения только файлов
+def list_files():
+    print("Файлы в рабочей директории:")
     for item in os.listdir():
         if os.path.isfile(item):
-            files.append(item)
-        elif os.path.isdir(item):
-            directories.append(item)
+            print(item)
 
-    with open(LISTDIR_FILE, 'w') as f:
-        f.write(f"files: {', '.join(files)}\n")
-        f.write(f"dirs: {', '.join(directories)}\n")
+# Функция для отображения информации об ОС
+def system_info():
+    print("Информация об операционной системе:")
+    print(platform.system(), platform.release())
 
-    print(f"Содержимое рабочей директории сохранено в файл '{LISTDIR_FILE}'.")
+# Функция для отображения информации о создателе программы
+def creator_info():
+    print("Создатель программы: Иван Иванов")
+
+# Функция для викторины
+def play_quiz():
+    famous_people = {
+        "А.С. Пушкин": "06.06.1799",
+        "Л.Н. Толстой": "09.09.1828",
+        "М.В. Ломоносов": "19.11.1711",
+        "Ф.М. Достоевский": "11.11.1821",
+        "П.И. Чайковский": "07.05.1840",
+        "А.П. Чехов": "29.01.1860",
+        "С.А. Есенин": "03.10.1895",
+        "И.С. Тургенев": "09.11.1818",
+        "В.В. Маяковский": "19.07.1893",
+        "Н.В. Гоголь": "01.04.1809"
+    }
+
+    selected_people = random.sample(list(famous_people.items()), 5)
+    correct_answers = 0
+
+    for person, birth_date in selected_people:
+        user_answer = input(f"Введите дату рождения {person} в формате 'dd.mm.yyyy': ")
+        if user_answer == birth_date:
+            print("Верно!")
+            correct_answers += 1
+        else:
+            print(f"Неверно! Правильная дата: {birth_date}")
+
+    print(f"Количество правильных ответов: {correct_answers} из 5")
 
 # Функция для работы с банковским счетом
 def manage_bank_account():
-    balance = read_balance()
-    purchases = read_history()
+    balance = 0
+    purchases = []
 
     while True:
         print('\n1. Пополнение счета')
@@ -64,11 +106,8 @@ def manage_bank_account():
         
         if choice == '1':
             balance = top_up(balance)
-            save_balance(balance)
         elif choice == '2':
             balance, purchases = make_purchase(balance, purchases)
-            save_balance(balance)
-            save_history(purchases)
         elif choice == '3':
             show_history(purchases)
         elif choice == '4':
@@ -102,6 +141,15 @@ def show_history(purchases):
     else:
         print('История покупок пуста.')
 
+# Функция для смены рабочей директории
+def change_directory():
+    new_dir = input("Введите путь к новой рабочей директории: ")
+    try:
+        os.chdir(new_dir)
+        print(f"Рабочая директория изменена на: {new_dir}")
+    except FileNotFoundError:
+        print("Папка не найдена")
+
 # Главное меню
 def main_menu():
     while True:
@@ -112,13 +160,12 @@ def main_menu():
         print("4. Просмотр содержимого директории")
         print("5. Посмотреть только папки")
         print("6. Посмотреть только файлы")
-        print("7. Сохранить содержимое директории в файл")
-        print("8. Информация об ОС")
-        print("9. Создатель программы")
-        print("10. Играть в викторину")
-        print("11. Мой банковский счет")
-        print("12. Сменить рабочую директорию")
-        print("13. Выход")
+        print("7. Информация об ОС")
+        print("8. Создатель программы")
+        print("9. Играть в викторину")
+        print("10. Мой банковский счет")
+        print("11. Сменить рабочую директорию")
+        print("12. Выход")
         
         choice = input("Выберите пункт: ")
         
@@ -135,18 +182,16 @@ def main_menu():
         elif choice == '6':
             list_files()
         elif choice == '7':
-            save_directory_contents()
-        elif choice == '8':
             system_info()
-        elif choice == '9':
+        elif choice == '8':
             creator_info()
-        elif choice == '10':
+        elif choice == '9':
             play_quiz()
-        elif choice == '11':
+        elif choice == '10':
             manage_bank_account()
-        elif choice == '12':
+        elif choice == '11':
             change_directory()
-        elif choice == '13':
+        elif choice == '12':
             print("Выход из программы.")
             break
         else:
